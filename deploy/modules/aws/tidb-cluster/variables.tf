@@ -1,13 +1,3 @@
-variable "tidb_cluster_chart_version" {
-  description = "tidb-cluster chart version"
-  default     = "v1.0.2"
-}
-
-variable "create_tidb_cluster_release" {
-  description = "Whether create tidb-cluster release in the node pools automatically"
-  default = true
-}
-
 variable "cluster_name" {
   type        = string
   description = "tidb cluster name"
@@ -55,12 +45,6 @@ variable "tidb_instance_type" {
 variable "monitor_instance_type" {
   type    = string
   default = "c5.2xlarge"
-}
-
-variable "override_values" {
-  description = "The helm values of TiDB cluster, it is recommended to use the 'file()' function call to read the content from a local file, e.g. 'file(\"my-cluster.yaml\")'"
-  type    = string
-  default = ""
 }
 
 variable "eks" {
@@ -131,7 +115,7 @@ variable "worker_ami_name_filter" {
   default     = "v*"
 }
 
-variable "worker_additional_security_group_ids" {
+variable "worker_security_group_ids" {
   description = "A list of additional security group ids to attach to worker instances"
   type        = list(string)
   default     = []
@@ -156,5 +140,5 @@ variable "kubelet_extra_args" {
 variable "group_kubelet_extra_args" {
   description = "If provided, override the kubelet_extra_args for a specific node group which matches the key of map (e.g. tidb, tikv, pd, monitor)"
   type        = map(string)
-  default = {}
+  default     = {}
 }

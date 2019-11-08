@@ -1,7 +1,7 @@
 locals {
   asg_tags = null_resource.tags_as_list_of_maps.*.triggers
 
-  default_iam_role_id = var.eks.worker_iam_role_name
+  default_iam_role_id = var.eks.role_arn
 
   workers_group_defaults_defaults = {
     name                          = "count.index"              # Name of the worker group. Literal count.index will never be used but if name is not set, the count.index interpolation will be used.
@@ -74,7 +74,7 @@ locals {
       asg_max_size         = var.tikv_count + 2
       pre_userdata         = file("${path.module}/pre_userdata")
       # additional_userdata  = file("userdata.sh")
-      suspended_processes  = ["ReplaceUnhealthy"]
+      suspended_processes = ["ReplaceUnhealthy"]
     },
     {
       name             = "${var.cluster_name}-tidb"
@@ -107,8 +107,8 @@ locals {
           lookup(var.group_kubelet_extra_args, "monitor", var.kubelet_extra_args)
         ]
       )
-      asg_desired_capacity  = 1
-      asg_max_size          = 3
+      asg_desired_capacity = 1
+      asg_max_size         = 3
     }
   ]
 

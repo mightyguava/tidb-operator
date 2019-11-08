@@ -1,7 +1,7 @@
 # Worker Groups using Launch Configurations
 
 resource "aws_autoscaling_group" "workers" {
-  name_prefix = "${var.eks.cluster_id}-${lookup(local.tidb_cluster_worker_groups[count.index], "name", count.index)}"
+  name_prefix = "${var.eks.id}-${lookup(local.tidb_cluster_worker_groups[count.index], "name", count.index)}"
   desired_capacity = lookup(
     local.tidb_cluster_worker_groups[count.index],
     "asg_desired_capacity",
@@ -29,17 +29,17 @@ resource "aws_autoscaling_group" "workers" {
   protect_from_scale_in = false
   count                 = local.worker_group_count
   placement_group       = "" # The name of the placement group into which to launch the instances, if any.
-  suspended_processes = lookup(local.tidb_cluster_worker_groups[count.index], "suspended_processes", [])
+  suspended_processes   = lookup(local.tidb_cluster_worker_groups[count.index], "suspended_processes", [])
 
   tags = concat(
     [
       {
         key                 = "Name"
-        value               = "${var.eks.cluster_id}-${lookup(local.tidb_cluster_worker_groups[count.index], "name", count.index)}-eks_asg"
+        value               = "${var.eks.id}-${lookup(local.tidb_cluster_worker_groups[count.index], "name", count.index)}-eks_asg"
         propagate_at_launch = true
       },
       {
-        key                 = "kubernetes.io/cluster/${var.eks.cluster_id}"
+        key                 = "kubernetes.io/cluster/${var.eks.id}"
         value               = "owned"
         propagate_at_launch = true
       },
@@ -77,13 +77,13 @@ resource "aws_autoscaling_group" "workers" {
 }
 
 resource "aws_launch_configuration" "workers" {
-  name_prefix = "${var.eks.cluster_id}-${lookup(local.tidb_cluster_worker_groups[count.index], "name", count.index)}"
+  name_prefix = "${var.eks.id}-${lookup(local.tidb_cluster_worker_groups[count.index], "name", count.index)}"
   associate_public_ip_address = lookup(
     local.tidb_cluster_worker_groups[count.index],
     "public_ip",
     local.workers_group_defaults["public_ip"],
   )
-  security_groups = concat([var.eks.worker_security_group_id], var.worker_additional_security_group_ids, compact(
+  security_groups = concat(var.worker_security_group_ids, compact(
     split(
       ",",
       lookup(
@@ -93,7 +93,7 @@ resource "aws_launch_configuration" "workers" {
       ),
     ),
   ))
-  iam_instance_profile = element(var.eks.worker_iam_instance_profile_names, count.index)
+  iam_instance_profile = "eks_worker_profile"
   image_id = lookup(
     local.tidb_cluster_worker_groups[count.index],
     "ami_id",

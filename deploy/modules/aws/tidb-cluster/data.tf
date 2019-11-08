@@ -1,7 +1,7 @@
 data "aws_ami" "eks_worker" {
   filter {
     name   = "name"
-    values = ["amazon-eks-node-${var.eks.cluster_version}-${var.worker_ami_name_filter}"]
+    values = ["amazon-eks-node-${var.eks.version}-${var.worker_ami_name_filter}"]
   }
 
   most_recent = true
@@ -15,9 +15,9 @@ data "template_file" "userdata" {
   count    = length(local.tidb_cluster_worker_groups)
 
   vars = {
-    cluster_name        = var.eks.cluster_id
-    endpoint            = var.eks.cluster_endpoint
-    cluster_auth_base64 = var.eks.cluster_certificate_authority_data
+    cluster_name        = var.eks.id
+    endpoint            = var.eks.endpoint
+    cluster_auth_base64 = var.eks.certificate_authority.0.data
     pre_userdata = lookup(
       local.tidb_cluster_worker_groups[count.index],
       "pre_userdata",
@@ -46,9 +46,9 @@ data "template_file" "launch_template_userdata" {
   count    = var.worker_group_launch_template_count
 
   vars = {
-    cluster_name        = var.eks.cluster_name
-    endpoint            = var.eks.cluster_endpoint
-    cluster_auth_base64 = var.eks.cluster_certificate_authority_data
+    cluster_name        = var.eks.id
+    endpoint            = var.eks.endpoint
+    cluster_auth_base64 = var.eks.certificate_authority.0.data
     pre_userdata = lookup(
       var.worker_groups_launch_template[count.index],
       "pre_userdata",
